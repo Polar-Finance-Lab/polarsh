@@ -43,7 +43,7 @@
 
 ## 업로드 검증
 
-원본 폴더: `/private/tmp/polarsh-guide/local`  
+원본 폴더: `/private/tmp/polarsh-guide/local`
 대상 폴더: `/private/tmp/polarsh-guide/server`
 
 서버가 같은 Mac에서 실행되지만, 전송 자체는 앱 → Bastion SSH 채널 → 대상 SSH/SFTP 연결을 통해 수행했습니다. 검증용 비교는 전송이 끝난 다음 로컬 파일 해시로 확인했습니다.
