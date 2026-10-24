@@ -2,7 +2,7 @@
 
 macOS용 로컬·SSH 통합 터미널. Tauri 2, React/TypeScript, Rust, xterm.js로 구현했습니다.
 
-[앱 다운로드](https://github.com/Polar-Finance-Lab/polarsh/releases/tag/v1.0.0) · [버전별 변경 이력](CHANGELOG.md)
+[앱 다운로드](https://github.com/Polar-Finance-Lab/polarsh/releases/tag/v1.0.0) · [버전별 변경 이력](CHANGELOG.md) · [스크린샷 사용 가이드](docs/user-guide.md)
 
 실행 앱은 릴리스의 `Polarsh-1.0.0-macos-arm64.zip`을 사용하세요. Apple Silicon용이며, 저장소 접근 권한이 있는 GitHub 계정으로 다운로드할 수 있습니다.
 
