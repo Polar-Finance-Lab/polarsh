@@ -2,6 +2,10 @@
 
 macOS용 로컬·SSH 통합 터미널. Tauri 2, React/TypeScript, Rust, xterm.js로 구현했습니다.
 
+[앱 다운로드](https://github.com/Polar-Finance-Lab/polarsh/releases/tag/v1.0.0) · [버전별 변경 이력](CHANGELOG.md)
+
+실행 앱은 릴리스의 `Polarsh-1.0.0-macos-arm64.zip`을 사용하세요. Apple Silicon용이며, 저장소 접근 권한이 있는 GitHub 계정으로 다운로드할 수 있습니다.
+
 ## 기능
 
 - 로컬 셸과 SSH 세션, 탭, 드래그 분할·이동·크기 조절
@@ -41,7 +45,7 @@ REA나 Termius 설치는 앱 실행·빌드에 필요하지 않습니다. 브라
 ./scripts/app-build --debug
 ```
 
-결과물은 `app/src-tauri/target/release/bundle/macos/Polarsh.app`이며, `--debug` 사용 시 `release` 대신 `debug` 디렉터리에 생성됩니다. Apple Developer ID 서명과 공증은 포함하지 않습니다. 이 저장소의 v1.0.0 릴리스는 소스 배포입니다.
+결과물은 `app/src-tauri/target/release/bundle/macos/Polarsh.app`이며, `--debug` 사용 시 `release` 대신 `debug` 디렉터리에 생성됩니다. Apple Developer ID 서명과 공증은 포함하지 않습니다. v1.0.0 릴리스에는 소스와 ad-hoc 서명된 Apple Silicon용 앱 ZIP을 함께 제공합니다.
 
 ## 검증
 
