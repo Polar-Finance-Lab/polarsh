@@ -283,6 +283,28 @@ mod tests {
         );
     }
     #[test]
+    fn saved_credentials_survive_encrypted_database_reopen() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("credentials.sqlite");
+        let key = [9u8; 32];
+        let secret = "synthetic-ssh-password-only";
+        let workspace = serde_json::json!({"version":1,"hosts":[{"id":"fixture"}],"snippets":[],
+            "credentials":[{"hostId":"fixture","scope":"fixture-scope","secret":secret}]}).to_string();
+        {
+            let db = database(&path).unwrap();
+            db.execute("INSERT INTO workspace(id,payload) VALUES(1,?1)",params![seal(&key,workspace.as_bytes()).unwrap()]).unwrap();
+        }
+        let disk = std::fs::read(&path).unwrap();
+        assert!(!disk.windows(secret.len()).any(|v| v == secret.as_bytes()));
+        let db = database(&path).unwrap();
+        let blob:Vec<u8> = db.query_row("SELECT payload FROM workspace WHERE id=1",[],|r|r.get(0)).unwrap();
+        let (_, restored) = workspace_with_key(Some(&key),Some(&blob),||panic!("unlocked vault must not prompt again")).unwrap();
+        let value:serde_json::Value = serde_json::from_str(&restored).unwrap();
+        assert_eq!(value["credentials"][0]["secret"],secret);
+        assert!(unseal(&[8u8;32], &blob).is_err());
+    }
+
+    #[test]
     #[ignore = "Explicit isolated macOS Keychain integration check"]
     fn macos_keychain_roundtrip() {
         let service = format!("dev.harbor.ssh.test.{}", uuid::Uuid::new_v4());

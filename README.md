@@ -71,7 +71,7 @@ cargo test --manifest-path app/src-tauri/Cargo.toml \
 
 ## 저장과 인증
 
-호스트와 저장 명령은 SQLite에 XChaCha20-Poly1305 암호문으로 보관하며 마스터 키는 macOS Keychain에 저장합니다. SSH 비밀번호와 개인 키 암호는 저장하지 않습니다. 로컬 터미널을 열 때에는 Vault 잠금 해제를 요청하지 않습니다.
+호스트와 저장 명령은 SQLite에 XChaCha20-Poly1305 암호문으로 보관하며 마스터 키는 macOS Keychain에 저장합니다. 호스트별로 **비밀번호 저장 / 키 암호 저장**을 선택하면 인증 정보도 같은 암호화 저장소에 보관하고 다음 연결에 사용합니다. 개인 키 파일 자체는 복사하지 않습니다. 로컬 터미널을 열 때에는 Vault 잠금 해제를 요청하지 않습니다.
 
 키체인 서비스는 `dev.polarsh.vault.v1`, 표시 이름은 `Polarsh — 호스트와 저장 명령`입니다. 이전 개발 버전의 키와 승인창 설명을 이전하는 코드가 포함됩니다. 기존 데이터 위치를 보존하기 위해 앱의 내부 bundle identifier는 `dev.harbor.ssh`를 유지합니다.
 

@@ -6,13 +6,14 @@ import ts from '../../app/node_modules/typescript/lib/typescript.js';
 import {paneIds,replacePane,removePane} from '../../app/src/pane-layout.ts';
 import {setTabTree,newTab,removeSession} from '../../app/src/terminal-tabs.ts';
 import {connectionRoute,SshRouteRun} from '../../app/src/ssh-route.ts';
+import {savedSecret,storeCredential,pruneCredentials} from '../../app/src/credentials.ts';
 const source=ts.createSourceFile('main.tsx',readFileSync(new URL('../../app/src/main.tsx',import.meta.url),'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
-const wanted=new Set(['abortRoute','startRoute','openHost','connect','reconnect','close']);const parts=[];
+const wanted=new Set(['abortRoute','startRoute','openHost','connect','reconnect','close','saveHost']);const parts=[];
 function visit(n){if(ts.isVariableDeclaration(n)&&wanted.has(n.name.getText(source)))parts.push('const '+n.getText(source)+';');if(ts.isExpressionStatement(n)&&n.getText(source).startsWith('advanceRoute.current='))parts.push(n.getText(source));ts.forEachChild(n,visit);}visit(source);
 const production=ts.transpileModule(parts.join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
-const factory=new Function('connectionRoute','SshRouteRun','hosts','adapter','layout',`
- const {paneIds,replacePane,removePane,setTabTree,newTab,removeSession}=layout;const state={};const reconnectTarget={current:null};const sessionsRef={items:[],get current(){return this.items},set current(items){this.items=items;for(const s of items)s.terminal??={dispose(){}}}},dataRef={current:{hosts}},routeRun={current:null},connecting={current:false},advanceRoute={current:()=>{}};
- const desktop=true,unlocked=true,quickConnect=true,activeRef={current:null};let password='',bastionSessionId='';
+const factory=new Function('connectionRoute','SshRouteRun','hosts','adapter','layout','credentials',`
+ const {savedSecret,storeCredential,pruneCredentials}=credentials;const {paneIds,replacePane,removePane,setTabTree,newTab,removeSession}=layout;const state={};const reconnectTarget={current:null};const sessionsRef={items:[],get current(){return this.items},set current(items){this.items=items;for(const s of items)s.terminal??={dispose(){}}}},dataRef={current:{hosts}},routeRun={current:null},connecting={current:false},advanceRoute={current:()=>{}};
+ const desktop=true,unlocked=true,quickConnect=true,activeRef={current:null};let password='',bastionSessionId='',rememberSecret=false;const setRememberSecret=v=>rememberSecret=v;const update=async fn=>{dataRef.current=pruneCredentials(fn(dataRef.current));return true;};
  const setPending=v=>state.pending=v,setError=v=>state.error=v,setNotice=()=>{},setMode=()=>{},setLayoutOpen=()=>{},setSidebar=()=>{},setActive=v=>state.active=typeof v==='function'?v(state.active):v,setSection=()=>{},setShowPassword=()=>{},setQuickConnect=()=>{},setVerified=()=>{};
  const setSelected=v=>state.selected=v,setPassword=v=>{password=v;state.password=v},setBastionSessionId=v=>{bastionSessionId=v},setShowConnection=v=>state.prompt=v,setTrust=v=>state.trust=v;
  const recoveryTimers={current:new Map()},recoverLatest={current:()=>{}};const activate=id=>state.active=id,navigate=()=>{},refresh=()=>{},updateSessions=v=>sessionsRef.current=v,tabState={ref:{current:[]},update(fn){this.ref.current=fn(this.ref.current)},add(id){this.ref.current.push(newTab(id))},remove(id){this.update(t=>removeSession(t,id))}};
@@ -21,12 +22,12 @@ const factory=new Function('connectionRoute','SshRouteRun','hosts','adapter','la
  class Terminal{cols=80;rows=24;loadAddon(){}writeln(){}write(){}dispose(){}}class FitAddon{}class Channel{}
  const invoke=(cmd,args)=>cmd==='connect_ssh'?adapter(args):Promise.resolve();
  ${production}
- return {state,tabState,sessionsRef,routeRun,recoveryTimers,recoverLatest,close,reconnect,openHost,startRoute,abortRoute,submit:secret=>connect(state.selected,secret),trust:()=>{const h={...state.trust.host,fingerprint:state.trust.fingerprint};routeRun.current.steps[routeRun.current.index]=h;setTrust(null);return connect(h,password);}};
+ return {state,dataRef,setRememberSecret,tabState,sessionsRef,routeRun,recoveryTimers,recoverLatest,close,reconnect,openHost,startRoute,abortRoute,submit:secret=>connect(state.selected,secret),trust:()=>{const h={...state.trust.host,fingerprint:state.trust.fingerprint};routeRun.current.steps[routeRun.current.index]=h;setTrust(null);return connect(h,password);}};
 `);
 const gateway={id:'g',name:'Gateway',host:'gateway.test',username:'ops',port:22};
 const target={id:'t',name:'Target',host:'target.test',username:'app',port:22,bastionHostId:'g'};
 const tick=()=>new Promise(r=>setImmediate(r));
-function harness(adapter){return factory(connectionRoute,SshRouteRun,[gateway,target],adapter,{paneIds,replacePane,removePane,setTabTree,newTab,removeSession});}
+function harness(adapter){return factory(connectionRoute,SshRouteRun,[gateway,target],adapter,{paneIds,replacePane,removePane,setTabTree,newTab,removeSession},{savedSecret,storeCredential,pruneCredentials});}
 test('actual handlers prompt each hop, reuse sessions, and ignore duplicate submit',async()=>{
  const calls=[];let release;const app=harness(a=>{calls.push(a);return new Promise(r=>release=r)});
  app.openHost(target);assert.equal(app.state.selected.id,'g');assert.equal(app.state.prompt,true);
@@ -89,4 +90,22 @@ test('recovery uses the transport flag, not translated message text; closing can
  channel.onmessage({type:'closed',message:'네트워크 연결이 끊어졌습니다.',retryable:false});t.mock.timers.tick(3000);assert.equal(recovered,0);
  channel.onmessage({type:'closed',message:'transport unavailable',retryable:true});assert.equal(app.recoveryTimers.current.size,1);t.mock.timers.tick(2000);assert.equal(recovered,1);
  channel.onmessage({type:'closed',message:'transport unavailable',retryable:true});app.close(app.sessionsRef.current[0]);t.mock.timers.tick(3000);assert.equal(recovered,1);
+});
+
+test('saved hop credentials connect automatically and failed credentials allow replacement',async()=>{
+ const calls=[];let fail=true;
+ const app=harness(async a=>{calls.push(a);if(a.request.host===target.host&&fail)throw {kind:'authentication'};});
+ app.dataRef.current=storeCredential(storeCredential(app.dataRef.current,gateway,true,'saved-gateway'),target,true,'outdated-target');
+ app.openHost(target);await tick();await tick();
+ assert.equal(calls.length,2);assert.equal(calls[0].request.password,'saved-gateway');assert.equal(calls[1].request.password,'outdated-target');
+ assert.equal(app.state.prompt,true);assert.equal(app.state.selected.id,target.id);assert.equal(app.state.password,'');
+ fail=false;await app.submit('new-target');
+ assert.equal(savedSecret(app.dataRef.current,target),'new-target');assert.equal(app.routeRun.current,null);
+ assert.equal(app.sessionsRef.current.some(s=>'secret' in s.host),false);
+});
+test('unchecked credentials remain one-time, checked credentials persist after success',async()=>{
+ const app=harness(async()=>{});app.openHost(gateway);await app.submit('one-time');
+ assert.equal(savedSecret(app.dataRef.current,gateway),undefined);
+ app.close(app.sessionsRef.current[0]);app.openHost(gateway);app.setRememberSecret(true);await app.submit('remembered');
+ assert.equal(savedSecret(app.dataRef.current,gateway),'remembered');
 });
