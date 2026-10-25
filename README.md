@@ -1,10 +1,10 @@
-# Polarsh 1.0.0
+# Polarsh 1.1.0
 
 macOS용 로컬·SSH 통합 터미널. Tauri 2, React/TypeScript, Rust, xterm.js로 구현했습니다.
 
-[앱 다운로드](https://github.com/Polar-Finance-Lab/polarsh/releases/tag/v1.0.0) · [버전별 변경 이력](CHANGELOG.md) · [스크린샷 사용 가이드](docs/user-guide.md)
+[앱 다운로드](https://github.com/Polar-Finance-Lab/polarsh/releases/tag/v1.1.0) · [버전별 변경 이력](CHANGELOG.md) · [스크린샷 사용 가이드](docs/user-guide.md)
 
-실행 앱은 릴리스의 `Polarsh-1.0.0-macos-arm64.zip`을 사용하세요. Apple Silicon용이며, 저장소 접근 권한이 있는 GitHub 계정으로 다운로드할 수 있습니다.
+실행 앱은 릴리스의 `Polarsh-1.1.0-macos-arm64.zip`을 사용하세요. Apple Silicon용이며, 저장소 접근 권한이 있는 GitHub 계정으로 다운로드할 수 있습니다.
 
 ## 첫 실행이 차단되나요?
 
@@ -89,3 +89,11 @@ cargo test --manifest-path app/src-tauri/Cargo.toml \
 `docs/`의 초기 기능 목록과 로드맵에는 아직 구현하지 않은 계획도 포함됩니다. 동기화·협업·AI 추천 등은 이번 릴리스 기능이 아닙니다. 원격 네트워크 전환, 장시간 사용, 다양한 한글 IME 조합에 대한 추가 검증이 필요합니다.
 
 로컬 개발 도구, 실행 로그, 사용자 데이터, 키·인증서, 의존성 디렉터리와 빌드 산출물은 저장소에 포함하지 않습니다.
+
+## 저장 명령 자동 제안
+
+저장된 항목의 잠금을 해제하고 `df -h`를 저장하면, 터미널에서 `df`를 입력할 때 제안합니다. **Tab** 또는 제안 클릭으로 나머지만 채우며, 실행은 **Enter**로 직접 합니다. **Esc**로 제안을 닫습니다. 잠긴 상태에서는 제안하지 않으며 자동으로 키체인을 열지 않습니다.
+
+일반 셸 프롬프트의 한 줄 끝에서 지원합니다. 여러 줄 입력, 중간 커서 편집, TUI, 일부 사용자 지정 프롬프트에서는 제안하지 않습니다. 기존 **⌘ J** 저장 명령 검색은 그대로 사용할 수 있습니다.
+
+[1.1.0 변경 내용](docs/release-1.1.0.md) · [브랜치·릴리스 관리](docs/release-workflow.md)
