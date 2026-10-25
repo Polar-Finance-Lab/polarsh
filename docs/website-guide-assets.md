@@ -5,6 +5,7 @@
 ## 가져갈 파일
 
 - 본문: [user-guide.md](user-guide.md)
+- 다운로드 직후 안내: [macos-first-launch.md](macos-first-launch.md)
 - 이미지: [assets/guide](assets/guide/) 아래 PNG 12장
 - 촬영 근거: [guide-capture-verification.md](guide-capture-verification.md)
 - 변경 이력: [CHANGELOG.md](../CHANGELOG.md)
@@ -45,6 +46,12 @@
 캡처의 서버는 외부 운영 서버가 아니라 같은 Mac에서 실행한 테스트 SSH 프로세스 두 개입니다. 실제 SSH 인증·서버 지문 확인·Bastion 터널·SFTP 전송을 사용했습니다. 샘플 서버는 일반 원격 셸 대신 echo 방식으로 동작하며, 분할 이미지의 명령은 실제 로컬 zsh에서 실행했습니다.
 
 앱 기본 테마나 테마 이름은 변경하지 않았습니다. 사용자의 기존 호스트·SSH 키·키체인 항목을 사용하지 않았고, 공개할 파일 목록은 촬영용 폴더로 한정했습니다.
+
+## 다운로드 버튼 옆 안내 문구
+
+> 첫 실행 시 Apple 확인 경고가 표시될 수 있습니다. 공식 배포 파일인지 확인한 뒤 시스템 설정 → 개인정보 보호 및 보안 → 그래도 열기로 실행하세요.
+
+바로 아래에 **첫 실행 도움말** 링크를 붙이고 [macos-first-launch.md](macos-first-launch.md)로 연결하세요.
 
 ## 게시 전 확인
 
