@@ -34,7 +34,7 @@ Polarsh 1.0.0은 Apple Developer ID 서명·공증을 받지 않아 첫 실행�
 
 해당 앱에 대한 예외가 등록되면 이후에는 일반적으로 더블클릭으로 열 수 있습니다. Mac 전체의 보안 기능을 끌 필요는 없습니다. [Apple 공식 절차](https://support.apple.com/ko-kr/102445)
 
-버튼이 보이지 않거나 이름이 **Polarsh 2**로 표시된다면 [첫 실행 문제 해결 가이드](macos-first-launch.md)를 확인하세요. 첫 실행 승인은 SSH 비밀번호 인증과 별개입니다.
+버튼이 보이지 않는다면 [첫 실행 문제 해결 가이드](macos-first-launch.md)를 확인하세요. 첫 실행 승인은 SSH 비밀번호 인증과 별개입니다.
 
 ### 폴더를 지정해서 열기
 
